@@ -64,8 +64,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="ChassisDrive", group="Linear OpMode")
-public class ChassisDrive extends LinearOpMode {
+@TeleOp(name="TestChassis2", group="Linear OpMode")
+public class TestChassis2 extends LinearOpMode {
 
     // Declare OpMode members
     private ElapsedTime runtime = new ElapsedTime();
@@ -79,11 +79,13 @@ public class ChassisDrive extends LinearOpMode {
 
     public void runMovement(){
         double max;
+        double driveSpeed = 0.8f;
+
 
         // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
         double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
         double lateral =  gamepad1.left_stick_x;
-        double yaw     =  gamepad1.right_stick_x;
+        double yaw     =  gamepad1.right_stick_x * 0.8f;
 
         // Combine the joystick requests for each axis-motion to determine each wheel's power.
         // Set up a variable for each drive wheel to save the power level for telemetry.
@@ -98,7 +100,7 @@ public class ChassisDrive extends LinearOpMode {
         max = Math.max(max, Math.abs(backLeftPower));
         max = Math.max(max, Math.abs(backRightPower));
 
-        if (max > 1.0) {
+        if (max > 0.9) {
             frontLeftPower  /= max;
             frontRightPower /= max;
             backLeftPower   /= max;
@@ -106,10 +108,10 @@ public class ChassisDrive extends LinearOpMode {
         }
 
         // Send calculated power to wheels
-        frontLeftDrive.setPower(frontLeftPower);
-        frontRightDrive.setPower(frontRightPower);
-        backLeftDrive.setPower(backLeftPower);
-        backRightDrive.setPower(backRightPower);
+        frontLeftDrive.setPower(frontLeftPower*driveSpeed);
+        frontRightDrive.setPower(frontRightPower*driveSpeed);
+        backLeftDrive.setPower(backLeftPower*driveSpeed);
+        backRightDrive.setPower(backRightPower*driveSpeed);
 
         telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
         telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);
@@ -119,11 +121,11 @@ public class ChassisDrive extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        double shooterSpeed = 0.7f;
+        double shooterSpeed = 0.8f;
         double shooterPower = 0f;
         double intakeSpeed = -0.5f;
         double intakePower = 0f;
-        double ferrisSpeed = 0.5f;
+        double ferrisSpeed = 0.25f;
         double ferrisPower = 0f;
 
         // Initialize the hardware variables. Note that the strings used here must correspond
@@ -163,20 +165,42 @@ public class ChassisDrive extends LinearOpMode {
 
             runMovement();
 
+            if(gamepad2.dpad_up){
+                
+                shooterSpeed = 0.9;
+                
+                shooterPower = (shooterPower == shooterSpeed) ? 0f:shooterSpeed;
+
+            }
+            if(gamepad2.dpad_down){
+                shooterSpeed = 0.6;                
+                shooterPower = (shooterPower == shooterSpeed) ? 0f:shooterSpeed;
+
+            }
+            if(gamepad2.dpad_right){
+                shooterSpeed = 0.8;
+                shooterPower = (shooterPower == shooterSpeed) ? 0f:shooterSpeed;
+
+            }
+            if(gamepad2.dpad_left){
+                shooterSpeed = 0.7;
+                shooterPower = (shooterPower == shooterSpeed) ? 0f:shooterSpeed;
+
+            }
             // switch shooter on/off
-            if(gamepad1.a){
+            if(gamepad2.a){
                 shooterPower = (shooterPower == shooterSpeed) ? 0f:shooterSpeed;
             }
             // switch intake on/off
-            if(gamepad1.b){
+            if(gamepad2.b){
                 intakePower = (intakePower == intakeSpeed) ? 0f:intakeSpeed;
             }
 
             // control ferris wheel
-            if(gamepad1.right_trigger_pressed){
-                ferrisPower = ferrisSpeed * gamepad1.right_trigger;
-            }else if(gamepad1.left_trigger_pressed){
-                ferrisPower = -ferrisSpeed * gamepad1.left_trigger;
+            if(gamepad2.right_trigger_pressed){
+                ferrisPower = ferrisSpeed * gamepad2.right_trigger;
+            }else if(gamepad2.left_trigger_pressed){
+                ferrisPower = -ferrisSpeed * gamepad2.left_trigger;
             }else{
                 ferrisPower = 0f;
             }
@@ -188,8 +212,9 @@ public class ChassisDrive extends LinearOpMode {
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Shooter Power", shooterPower);
+            telemetry.addData("Shooter ShooterSpeed", shooterSpeed);
 
             telemetry.update();
         }
     }}
+
