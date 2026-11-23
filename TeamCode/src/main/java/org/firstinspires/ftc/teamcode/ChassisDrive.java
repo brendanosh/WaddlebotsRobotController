@@ -77,6 +77,31 @@ public class ChassisDrive extends LinearOpMode {
     private CRServo intakeServo = null;
     private CRServo ferrisServo = null;
 
+    //Rising edge detection variables to aid with debouncing
+    
+    //Current state variables
+    boolean current_dpadUp = false;
+    boolean current_dpadLeft = false;
+    boolean current_dpadRight = false;
+    boolean current_dpadDown = false;
+    boolean current_a = false;
+    boolean current_b = false;
+    
+    
+    //Previous state variables
+    
+    boolean previous_dpadUp = false;
+    boolean previous_dpadLeft = false;
+    boolean previous_dpadRight = false;
+    boolean previous_dpadDown = false;
+    boolean previous_a = false;
+    boolean previous_b = false;
+    
+    
+
+
+
+
     public void runMovement(){
         double max;
         double driveSpeed = 0.8f;
@@ -127,6 +152,7 @@ public class ChassisDrive extends LinearOpMode {
         double intakePower = 0f;
         double ferrisSpeed = 0.25f;
         double ferrisPower = 0f;
+       
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
@@ -165,34 +191,31 @@ public class ChassisDrive extends LinearOpMode {
 
             runMovement();
 
-            if(gamepad2.dpad_up){
-                
-                shooterSpeed = 0.9;
-                
-                shooterPower = (shooterPower == shooterSpeed) ? 0f:shooterSpeed;
-
+            current_dpadUp = gamepad2.dpad_up;
+            current_dpadLeft = gamepad2.dpad_left;
+            current_dpadRight = gamepad2.dpad_right;
+            current_dpadDown = gamepad2.dpad_down;
+            current_a = gamepad2.a;
+            current_b = gamepad2.b;
+            
+            
+            
+            if(current_dpadUp && !previous_dpadUp){
+                shooterSpeed += 0.05;
+                if(shooterPower != 0) shooterPower = shooterSpeed;
             }
-            if(gamepad2.dpad_down){
-                shooterSpeed = 0.6;                
-                shooterPower = (shooterPower == shooterSpeed) ? 0f:shooterSpeed;
-
+            else if(current_dpadDown && !previous_dpadDown){
+                shooterSpeed -= 0.05;   
+                if(shooterPower != 0) shooterPower = shooterSpeed;
             }
-            if(gamepad2.dpad_right){
-                shooterSpeed = 0.8;
-                shooterPower = (shooterPower == shooterSpeed) ? 0f:shooterSpeed;
-
-            }
-            if(gamepad2.dpad_left){
-                shooterSpeed = 0.7;
-                shooterPower = (shooterPower == shooterSpeed) ? 0f:shooterSpeed;
-
-            }
+            
+            // DO NOT PUSH TO PROD
             // switch shooter on/off
-            if(gamepad2.a){
+            if(current_a && !previous_a){
                 shooterPower = (shooterPower == shooterSpeed) ? 0f:shooterSpeed;
             }
             // switch intake on/off
-            if(gamepad2.b){
+            if(current_b && !previous_b){
                 intakePower = (intakePower == intakeSpeed) ? 0f:intakeSpeed;
             }
 
@@ -212,9 +235,19 @@ public class ChassisDrive extends LinearOpMode {
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Shooter ShooterSpeed", shooterSpeed);
+            telemetry.addData("Shooter Speed", shooterSpeed);
 
             telemetry.update();
-        }
-    }}
 
+            
+            previous_dpadUp = current_dpadUp;
+            previous_dpadLeft = current_dpadLeft;
+            previous_dpadRight = current_dpadRight;
+            previous_dpadDown = current_dpadDown;
+            previous_a = current_a;
+            previous_b = current_b;
+            
+            
+        }
+    }
+}
